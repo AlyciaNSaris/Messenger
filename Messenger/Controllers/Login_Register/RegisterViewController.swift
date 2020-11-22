@@ -4,18 +4,23 @@
 //
 //  Created by Alycia Saris on 11/13/20.
 //  Copyright © 2020 Alycia Saris. All rights reserved.
-//
+//  REGISTER SCREEN TO REGISTER NEW USERS AND STORE THEM IN FIREBASE
 
 import UIKit
 import FirebaseAuth
+import JGProgressHUD
 
 class RegisterViewController: UIViewController {
+    
+    private let spinner = JGProgressHUD(style: .dark)
+
+    
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.clipsToBounds = true
         return scrollView
     }()
-    
+    // UPLOAD PROFILE PICTURE
     private let imageView: UIImageView = {
            let imageView = UIImageView()
            imageView.image = UIImage(systemName: "person.circle")
@@ -26,7 +31,7 @@ class RegisterViewController: UIViewController {
            imageView.layer.borderColor = UIColor.lightGray.cgColor
            return imageView
        }()
-    
+    // PERSONAL INFORMATION OF USER
     private let firstNameField: UITextField = {
         let field = UITextField()
         field.autocapitalizationType = .none
@@ -145,7 +150,7 @@ class RegisterViewController: UIViewController {
     @objc private func didTapChangeProfilePic() {
         presentPhotoActionSheet()
     }
-    
+    // CUSTOMIZE THE LAYOUT
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         scrollView.frame = view.bounds
@@ -194,11 +199,18 @@ class RegisterViewController: UIViewController {
                 return
         }
         
+        spinner.show(in: view)
+        
         // Firebase Log In
         
         DatabaseManager.shared.userExists(with: email, completion: { [weak self] exists in
             guard let strongSelf = self else {
                 return
+            }
+            
+            DispatchQueue.main.async {
+                
+                strongSelf.spinner.dismiss()
             }
             
             guard !exists else {
@@ -287,7 +299,7 @@ extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationC
         
         present(actionSheet, animated: true)
     }
-    
+    // FUNCTIONS TO ALLOW USER TO UPLOAD OR TAKE A PROFILE PICTURE
     func presentCamera() {
         let vc = UIImagePickerController()
         vc.sourceType = .camera
