@@ -209,26 +209,42 @@ class RegisterViewController: UIViewController {
             }
             
             DispatchQueue.main.async {
-                
                 strongSelf.spinner.dismiss()
             }
-            
+            // DOES THE USER EXIST?
             guard !exists else {
                 //user already exists
                 strongSelf.alertUserLoginError(message: "Looks like a user account for that email address already exists.")
                 return
             }
-            
+            // CREATE THE USER
             FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password, completion: { authResult, error in
-                guard  authResult != nil, error == nil else {
+                guard authResult != nil, error == nil else {
                     print("Error creating user")
                     return
                 }
-                
-                DatabaseManager.shared.insertUser(with: ChatAppUser(firstName: firstName,
-                                                                    lastName: lastName,
-                                                                    emailAddress: email))
-                
+                let chatUser = ChatAppUser(firstName: firstName,
+                                           lastName: lastName,
+                                           emailAddress: email)
+                DatabaseManager.shared.insertUser(with: chatUser, completion: { success in
+                    if success {
+                        // upload image
+                        guard let image = strongSelf.imageView.image,
+                            let data = image.pngData() else {
+                                return
+                        }
+                        let filename = chatUser.profilePictureFileName
+                        StorageManager.shared.uploadProfilePicture(with: data, fileName: filename, completion: { result in
+                            switch result {
+                            case .success(let downloadUrl):
+                                UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
+                                print(downloadUrl)
+                            case .failure(let error):
+                                print("Storage Manager error:\(error)")
+                            }
+                        })
+                    }
+                })
                 
                 strongSelf.navigationController?.dismiss(animated: true, completion: nil)
                 
@@ -284,14 +300,14 @@ extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationC
                                             handler: nil))
         actionSheet.addAction(UIAlertAction(title: "Take Photo",
                                             style: .default,
-                                            handler: { [weak self]_ in
+                                            handler: { [weak self] _ in
                                                 
                                                 self?.presentCamera()
                                                 
         }))
         actionSheet.addAction(UIAlertAction(title: "Choose Photo",
                                             style: .default,
-                                            handler: { [weak self]_ in
+                                            handler: { [weak self] _ in
                                                 
                                                 self?.presentPhotoPicker()
                                                 
