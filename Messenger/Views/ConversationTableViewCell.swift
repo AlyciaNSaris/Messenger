@@ -45,14 +45,14 @@ class ConversationTableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+    // FUNCTION DISPLAYS CHATS STORED ON DEVICE
     override func layoutSubviews() {
         super.layoutSubviews()
         
         userImageView.frame = CGRect(x: 10,
                                      y: 10,
-                                     width: 100,
-                                     height: 100)
+                                     width: 80,
+                                     height: 80)
         userNameLabel.frame = CGRect(x: userImageView.right + 10,
                                      y: 10,
                                      width: contentView.width - 20 - userImageView.width,
@@ -64,13 +64,13 @@ class ConversationTableViewCell: UITableViewCell {
 
 
     }
-    
+    // READS DATA FROM DATABASE AND SENDS IT TO THE CHAT APP
     public func configure(with model: Conversation) {
         self.userMessageLabel.text = model.latestMessage.text
         self.userNameLabel.text = model.name
         //intentional error for debugging
-        // let path = "images/\(model.otherUserEmail)_profile_picture.png"
-        let path = "\(model.otherUserEmail)_profile_picture.png"
+        let path = "images/\(model.otherUserEmail)_profile_picture.png"
+        // let path = "\(model.otherUserEmail)_profile_picture.png"
         StorageManager.shared.downloadURL(for: path, completion: { [weak self] result in
             switch result {
             case .success(let url):

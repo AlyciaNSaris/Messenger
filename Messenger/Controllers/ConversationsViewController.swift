@@ -59,7 +59,7 @@ class ConversationsViewController: UIViewController {
         fetchConversations()
         startListeningForConversations()
     }
-    
+     //UPDATES TABLE VIEW WITH NEW CONVERSTAIONS
     private func startListeningForConversations(){
         guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
             return
@@ -100,7 +100,7 @@ class ConversationsViewController: UIViewController {
             let email = result["email"] else {
                 return
         }
-        let vc = ChatViewController(with: email)
+        let vc = ChatViewController(with: email, id: nil)
         vc.isNewConversation = true 
         vc.title = name
         vc.navigationItem.largeTitleDisplayMode = .never
@@ -158,7 +158,7 @@ extension ConversationsViewController: UITableViewDelegate, UITableViewDataSourc
         let model = conversations[indexPath.row]
 
         
-        let vc = ChatViewController(with: model.otherUserEmail)
+        let vc = ChatViewController(with: model.otherUserEmail, id: model.id)
         vc.title = model.name
         vc.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(vc, animated: true)
